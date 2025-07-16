@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mustache@4.2.0/mustache.min.js"></script>
+    <title>쪽지 및 채팅</title>
+    <style>
+        .chat-popup,
+        .note-popup {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 320px;
+            height: 400px;
+            background: #fff;
+            border: 1px solid #aaa;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        #chat-message,
+        #note-message {
+            width: 75%;
+            padding: 6px;
+            margin-right: 5px;
+        }
+
+        #send-message,
+        #send-note {
+            padding: 6px 10px;
+            cursor: pointer;
+        }
+
+        .chat-toggle-btn,
+        .note-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #0066cc;
+            color: #fff;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .note-toggle-btn {
+            right: 90px;
+        }
+
+        .chat-messages,
+        .note-messages {
+            margin-top: 40px;
+        }
+
+        .sender-message {
+            background-color: #e0f7fa;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 6px;
+            text-align: right;
+        }
+
+        .chat-popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            max-height: 400px;
+        }
+
+        .chat-header {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+
+        .chat-messages .sender-message {
+            align-self: flex-end;
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            max-width: 70%;
+            word-wrap: break-word;
+            text-align: right;
+        }
+
+        .chat-messages .receiver-message {
+            align-self: flex-start;
+            background-color: #ecf0f1;
+            color: #34495e;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            max-width: 70%;
+            word-wrap: break-word;
+            text-align: left;
+        }
+
+        /* 채팅 입력창과 전송 버튼 스타일 */
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            /* padding: 10px; */
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .chat-input button {
+            padding: 8px 12px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* 채팅 메시지 스타일 */
+        .note-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .note-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 400px;
+            /* 팝업창 높이 */
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            /* 세로 방향으로 배치 */
+            max-height: 400px;
+            box-sizing: border-box;
+        }
+
+        .note-sender-bar {
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .note-sender-bar input {
+            width: 100%;
+            box-sizing: border-box;
+
+            padding: 8px;
+            font-size: 0.95em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            color: #666;
+        }
+
+        .note-header {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note-close-btn {
+            background: none;
+            color: white;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        .note-item {
+            background-color: #ecf0f1;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .note-item .sender {
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        .note-item .message {
+            margin-top: 5px;
+            color: #34495e;
+        }
+
+        .note-item .timestamp {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .note-input-bar {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background-color: #fff;
+            /* 수정된 부분 */
+            width: 100%;
+            box-sizing: border-box;
+            /* 패딩 포함한 크기 지정 */
+            margin-top: auto;
+        }
+
+        /* 입력창 */
+        .note-input-bar input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* 전송 버튼 */
+        .note-input-bar button {
+            padding: 8px 12px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .note-input-bar button:hover {
+            background-color: #34495e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="floating-buttons">
+        <button class="chat-toggle-btn" title="채팅 열기" aria-label="채팅 열기">
+            <i class="fas fa-comments"></i>
+        </button>
+        <button class="note-toggle-btn" title="쪽지 열기" aria-label="쪽지 열기">
+            <i class="fas fa-envelope"></i>
+        </button>
+    </div>
+
+
+    <!-- 쪽지 팝업 -->
+    <div class="note-popup">
+        <div class="note-header">
+            <span>쪽지</span>
+            <button class="note-close-btn">&times;</button>
+        </div>
+
+
+        <div class="note-nav">
+            <button class="received-notes-btn">받은 쪽지</button>
+            <button class="sent-notes-btn">보낸 쪽지</button>
+        </div>
+
+        <div class="note-sender-bar">
+            <input type="text" id="note-receiver" placeholder="받는 사람 아이디를 입력하세요" />
+        </div>
+        <!-- 헤더: 닫기 버튼 -->
+
+        <!-- 중간: 쪽지 내용 -->
+        <div class="note-messages">
+            <ul>
+                {{#notes}}
+                <li>보낸 사람: {{senderId}} - 내용: {{message}}</li>
+                {{/notes}}
+            </ul>
+        </div>
+
+        <!-- 하단: 메시지 입력 및 전송 -->
+        <div class="note-input-bar">
+            <input type="text" id="note-message" placeholder="메시지를 입력하세요..." />
+            <button id="send-note">전송</button>
+        </div>
+    </div>
+
+    <!-- 채팅 팝업 -->
+    <div class="chat-popup" style="display: none;">
+        <div class="chat-header">
+            <span class="chat-with">실시간 채팅</span>
+            <button class="chat-close-btn">&times;</button>
+        </div>
+        <div class="chat-messages"></div>
+        <div class="chat-input">
+            <input type="text" id="chat-message" placeholder="메시지를 입력하세요..." />
+            <button id="send-message">전송</button>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+
+            // 메인페이지 채팅 버튼 클릭 시
+            $('.chat-toggle-btn').on('click', function () {
+                $('.chat-popup').fadeIn();
+            });
+
+            // 채팅창 닫기
+            $('.chat-close-btn').on('click', function () {
+                $('.chat-popup').fadeOut();
+            });
+
+            // 메시지 전송
+            $('#send-message').on('click', function () {
+                const message = $('#chat-message').val().trim();
+                if (!message) return;
+
+                if (!currentUser) {
+                    alert("로그인이 필요합니다.");
+                    return;
+                }
+
+                // 채팅 메시지 전송 (서버로 AJAX 요청)
+                const senderId = currentUser.useridx;
+                const senderName = currentUser.userName;
+
+                $('.chat-messages').append(`
+                <div class="sender-message">
+                <strong>${senderName}</strong>: ${message}
+                </div>
+            `);
+
+                $('#chat-message').val('');
+
+                $.ajax({
+                    url: '/api/chat/send',  // 채팅 메시지 전송 API
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        sender: { useridx: senderId },
+                        receiver: { useridx: receiverId },
+                        message: message
+                    }),
+                    success: function (response) {
+                        // 내가 보낸 메시지 추가
+                        $('.chat-messages').append('<div class="sender-message">' + response.message + '</div>');
+                        $('#chat-message').val('');  // 메시지 입력창 초기화
+                    },
+                    error: function () {
+                        alert('메시지 전송에 실패했습니다.');
+                    }
+                });
+
+            });
+        });
+
+        // 쪽지 
+        let currentUser = null; // 🔹 세션 로그인 사용자 저장용
+
+        $(document).ready(function () {
+            // 🔸 로그인된 사용자 정보 요청
+            $.ajax({
+                url: '/api/session-user',
+                method: 'GET',
+                success: function (user) {
+                    currentUser = user;
+                    $('#login-btn').hide();  // 로그인된 경우 로그인 버튼 숨김
+                },
+                error: function (xhr) {
+                    if (xhr.status === 401) {
+                        // 로그인 안한 상태
+                        currentUser = null;
+                        $('.note-toggle-btn').hide();
+                        $('.chat-toggle-btn').hide();
+                        $('#login-btn').show();  // 로그인 버튼 표시
+                    }
+                }
+            });
+
+            $('#login-btn').on('click', function () {
+                window.location.href = '/login';
+            });
+
+            // 🔸 쪽지 팝업 열기
+            $('.note-toggle-btn').on('click', function () {
+                if (!currentUser) {
+                    alert('로그인이 필요합니다.');
+                    return;
+                }
+
+                $.ajax({
+                    url: `/api/notes/received/${currentUser.userid}`,
+                    method: 'GET',
+                    success: function (response) {
+                        const template = `
+                        {{#notes}}
+                        <div class="note-item" data-note-id="{{id}}">
+                            <span class="sender">보낸 사람: {{senderId}}</span>
+                            <div class="message">{{message}}</div>
+                            <div class="timestamp">{{timestamp}}</div>
+                        </div>
+                        {{/notes}}
+                    `;
+                        const rendered = Mustache.render(template, { notes: response });
+                        $('.note-messages').html(rendered);
+                        $('.note-popup').fadeIn();
+                    },
+                    error: function () {
+                        alert('쪽지를 불러오는 데 실패했습니다.');
+                    }
+                });
+            });
+
+            // 쪽지 창 닫기
+            $('.note-close-btn').on('click', function () {
+                $('.note-popup').fadeOut();  // 쪽지 팝업 닫기
+            });
+
+            // 쪽지 클릭 시 상세 내용 표시
+            $(document).on('click', '.note-item', function () {
+                const noteId = $(this).data('note-id');
+
+                // 선택한 쪽지의 ID를 통해 상세 내용을 불러오는 API 호출
+                $.ajax({
+                    url: `/api/notes/${noteId}`,  // 쪽지 상세 내용 조회 API
+                    method: 'GET',
+                    success: function (response) {
+                        const template = `
+                            {{#notes}}
+                            <div class="note-item" data-note-id="{{noteId}}">
+                                <span class="sender">보낸 사람: {{senderId}}</span>
+                                <div class="message">{{message}}</div>
+                                <div class="timestamp">{{timestamp}}</div>
+                            </div>
+                            {{/notes}}
+                        `;
+
+                        const rendered = Mustache.render(template, { notes: response });
+                        $('.note-messages').html(rendered);
+                    },
+                    error: function () {
+                        alert('쪽지 상세 내용을 불러오지 못했습니다.');
+                    }
+                });
+            });
+
+        });
+
+        $('#send-note').on('click', function () {
+            const message = $('#note-message').val().trim();
+            const receiverId = $('#note-receiver').val().trim();
+
+            if (!message) {
+                alert('메시지를 입력하세요.');
+                return;
+            }
+
+            if (!receiverId) {
+                alert('받는 사람 아이디를 입력하세요.');
+                return;
+            }
+
+            if (!currentUser) {
+                alert('로그인이 필요합니다.');
+                return;
+            }
+
+            $.ajax({
+                url: '/api/notes/send',  // 쪽지 전송 API 엔드포인트
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    senderId: currentUser.userid,  // 로그인된 사용자 ID
+                    receiverId: receiverId,
+                    message: message
+                }),
+                success: function (response) {
+                    alert('쪽지가 전송되었습니다.');
+                    $('#note-message').val('');  // 입력창 초기화
+                    // 필요시 받은 쪽지 목록 새로고침 등 추가 처리
+                },
+                error: function () {
+                    alert('쪽지 전송에 실패했습니다.');
+                }
+            });
+
+        });
+
+
+
+        $('.received-notes-btn').on('click', function () {
+            if (!currentUser) {
+                alert('로그인이 필요합니다.');
+                return;
+            }
+
+            $.ajax({
+                url: `/api/notes/received/${currentUser.userid}`,  // 로그인된 사용자 ID 직접 사용
+                method: 'GET',
+                success: function (data) {
+                    const $noteMessages = $('.note-messages');
+                    $noteMessages.empty();
+
+                    if (data.length === 0) {
+                        $noteMessages.append('<div class="note-item">받은 쪽지가 없습니다.</div>');
+                        return;
+                    }
+
+                    data.forEach(note => {
+                        const item = `
+                    <div class="note-item">
+                        <div class="sender">${note.senderId}</div>
+                        <div class="message">${note.message}</div>
+                        <div class="timestamp">${note.timestamp || ''}</div>
+                    </div>`;
+                        $noteMessages.append(item);
+                    });
+                },
+                error: function () {
+                    alert('받은 쪽지를 불러오는 데 실패했습니다.');
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>

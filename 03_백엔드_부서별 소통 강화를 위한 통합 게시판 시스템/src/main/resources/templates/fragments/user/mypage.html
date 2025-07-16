@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>마이 페이지</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 50px auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 10px;
+      margin-top: 30px;
+    }
+
+    form ul,
+    section ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      margin: 15px 0;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    button[type="submit"] {
+      margin-top: 20px;
+      background-color: #2c7be5;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #1a68d1;
+    }
+
+    a {
+      text-decoration: none;
+      color: #2c7be5;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    small {
+      color: #888;
+      margin-left: 10px;
+      font-size: 13px;
+    }
+
+    section + section {
+      margin-top: 40px;
+    }
+    
+  </style>
+</head>
+<body>
+
+<main>
+  <section>
+    <h2>내 정보</h2>
+    <ul>
+      <li><strong>아이디:</strong> {{loginUser.userid}}</li>
+    </ul>
+    <form action="/mypage/update-info" method="post">
+      <ul>
+        <li><strong>이름:</strong> <input type="text" name="userName" value="{{loginUser.userName}}" required /></li>
+        <li><strong>이메일:</strong> <input type="email" name="userEmail" value="{{loginUser.userEmail}}" required /></li>
+        <li><strong>전화번호:</strong> <input type="tel" name="phone" value="{{loginUser.phone}}" required /></li>
+        <li><strong>비밀번호:</strong> <input type="password" name="password" required /></li>
+        <li><strong>새 비밀번호:</strong> <input type="password" name="newPassword" /></li>
+        <li><strong>새 비밀번호 확인:</strong> <input type="password" name="rePassword" /></li>
+      </ul>
+      <button type="submit">정보 수정</button>
+    </form>
+  </section>  
+</main>
+
+</body>
+</html>

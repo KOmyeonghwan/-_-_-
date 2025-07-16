@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 페이지</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: "Noto Sans", sans-serif;
+            background: linear-gradient(135deg, #f2f6fc, #e0eafc);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 500px;
+            height: auto;
+            background-color: #ffffff;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            /* 그림자 더 진하게 */
+            border-radius: 12px;
+            border: 1px solid #d0d7e1;
+            /* 테두리 추가로 입체감 */
+            padding: 30px 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 30px;            
+            color: #333;
+        }
+
+        .logo p {
+            font-size: 14px;
+            color: #666;
+            margin-top: 0;
+        }       
+
+        label {             
+            font-size: 14px;            
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 6px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 5px rgba(66, 133, 244, 0.3);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: #3367d6;
+        }
+
+        .looking-for-info {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .looking-for-info a {
+            margin: 0 10px;
+            font-size: 13px;
+            color: #555;
+            text-decoration: none;
+        }
+
+        .looking-for-info a:hover {
+            text-decoration: underline;
+            color: #333;
+        }      
+       
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="wrapper">
+            <div class="logo">
+                <h1>
+                    C O M U
+                </h1>
+            </div>
+            <form id="loginForm" method="post">
+                <div class="login-wrapper">
+                    <div class="login-userid">
+                        <label>아이디</label>
+                        <input type="text" name="userid" placeholder="아이디를 입력해주세요" required><br>
+                    </div>
+                    <div class="login-password">
+                        <label>비밀번호</label>
+                        <input type="password" name="password" placeholder="비밀번호를 입력해주세요" id="password" required><br>
+                    </div>
+                    <input type="hidden" name="redirect" value="{{redirect}}">
+                </div>
+                <button class="login-button" type="submit" id="loginButton">로그인</button>
+                <div class="looking-for-info">
+                    <a href="/findid">아이디 찾기</a>
+                    <a href="/findpwd">비밀번호 찾기</a>
+                    <a href="/register">회원가입</a>
+                </div>                     
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $('#loginButton').on('click', function (e) {
+            e.preventDefault();
+    
+            const userid = $('input[name="userid"]').val();
+            const password = $('input[name="password"]').val();
+    
+            if (!userid || !password) {
+                alert("아이디와 비밀번호를 모두 입력해주세요.");
+                return;
+            }
+    
+            $.ajax({
+                type: 'POST',
+                url: '/login',
+                data: {
+                    'userid': userid,
+                    'password': password,
+                    'redirect': $('input[name="redirect"]').val() // ✅ Mustache로 변경된 hidden 필드 값 사용
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert("로그인 완료");
+    
+                        // ✅ 관리자(admin) 계정일 경우 admin.html로 이동
+                        if (response.user && response.user.admin === true) {
+                            window.location.href = "/admin";
+                        } else {
+                            // ✅ 일반 유저는 redirect 값 또는 /main으로 이동
+                            window.location.href = response.redirect || "/main";
+                        }
+    
+                    } else {
+                        alert("아이디 또는 비밀번호가 잘못되었습니다.");
+                    }
+                },
+                error: function () {
+                    alert("서버와의 연결에 문제가 발생했습니다. 나중에 다시 시도해주세요.");
+                }
+            });
+        });
+    </script>
+    
+</body>
+
+</html>

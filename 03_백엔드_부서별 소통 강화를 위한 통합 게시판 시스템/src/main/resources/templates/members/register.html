@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 페이지</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background: linear-gradient(135deg, #f2f6fc, #e0eafc);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 550px;
+            height: auto;
+            background-color: #ffffff;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            /* 그림자 더 진하게 */
+            border-radius: 12px;
+            border: 1px solid #d0d7e1;
+            /* 테두리 추가로 입체감 */
+            padding: 30px 40px;
+        }
+
+        .logo h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .register {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .register label {
+            width: 120px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .register input,
+        .register select {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .register select {
+            appearance: none;
+            background-color: white;
+        }
+
+        .register input:focus,
+        .register select:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 5px rgba(66, 133, 244, 0.3);
+        }
+
+        .register button {
+            margin-left: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .register button:hover {
+            background-color: #3367d6;
+        }
+
+        #useridStatus,
+        #passwordStatus {
+            margin-left: 120px;
+            font-size: 13px;
+            height: 18px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #submitBtn,
+        #cancelBtn {
+            padding: 10px 16px;
+            font-size: 14px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #submitBtn[disabled] {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="logo">
+            <h1>회원가입</h1>
+        </div>
+
+        <form action="/register" method="post" id="registerForm" autocomplete="off">
+            <div class="register">
+                <label>아이디</label>
+                <input type="text" name="userid" placeholder="아이디 입력 (8~20자)" id="userid" required>
+                <button type="button" id="checkUseridBtn">중복확인</button>
+            </div>
+            <span id="useridStatus"></span>
+
+            <div class="register">
+                <label>비밀번호</label>
+                <input type="password" name="password" placeholder="비밀번호 입력" required>
+            </div>
+            <div class="register">
+                <label>비밀번호 확인</label>
+                <input type="password" name="rePassword" placeholder="비밀번호 확인" required>
+            </div>
+            <span id="passwordStatus"></span>
+
+            <div class="register">
+                <label>이름</label>
+                <input type="text" name="userName" placeholder="이름 입력" required>
+            </div>
+            <div class="register">
+                <label>이메일</label>
+                <input type="email" name="userEmail" placeholder="이메일 입력" required>
+            </div>
+            <div class="register">
+                <label>부서 선택</label>
+                <select name="department.deptId" required>
+                    <option value="">부서 선택</option>
+                    {{#departments}}
+                    <option value="{{deptId}}">{{deptName}}</option>
+                    {{/departments}}
+                </select>
+            </div>
+            <div class="register">
+                <label>주소</label>
+                <input type="text" id="zipCode" name="zipCode" placeholder="주소 검색" required readonly>
+                <button type="button" onclick="execDaumPostcode()">주소 검색</button>
+            </div>
+            <div class="register">
+                <label>상세주소</label>
+                <input type="text" name="detailAddress" placeholder="상세 주소 입력" required>
+            </div>
+            <div class="register">
+                <label>전화번호</label>
+                <input type="text" name="phone" placeholder="전화번호 입력" required>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" id="submitBtn" disabled>가입하기</button>
+                <button type="button" id="cancelBtn">메인페이지</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 다음 주소 API -->
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    <script>
+        $('#checkUseridBtn').on('click', function () {
+            const userid = $('#userid').val();
+            if (userid.length < 8 || userid.length > 20) {
+                alert("아이디는 8자 이상 20자 이하로 입력해주세요.");
+                return;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/check-userid',
+                data: { 'userid': userid },
+                success: function (response) {
+                    if (response) {
+                        $('#useridStatus').text('이미 사용 중인 아이디입니다.').css('color', 'red');
+                        $('#submitBtn').prop('disabled', true);
+                    } else {
+                        $('#useridStatus').text('사용 가능한 아이디입니다.').css('color', 'green');
+                        $('#submitBtn').prop('disabled', false);
+                    }
+                },
+                error: function () {
+                    alert("아이디 중복 확인 실패. 다시 시도해주세요.");
+                }
+            });
+        });
+
+        $('#cancelBtn').on('click', function () {
+            $('#useridStatus').text('');
+            $('#submitBtn').prop('disabled', true);
+            window.location.href = '/main';
+        });
+
+        $('#registerForm').on('submit', function (event) {
+            const password = $('[name="password"]').val();
+            const rePassword = $('[name="rePassword"]').val();
+            const phone = $('[name="phone"]').val();
+            const email = $('[name="userEmail"]').val();
+            const phonePattern = /^01[016789]-?\d{3,4}-?\d{4}$/;
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (password.length < 8 || password.length > 20) {
+                alert("비밀번호는 8자 이상 20자 이하로 입력해주세요.");
+                event.preventDefault();
+                return;
+            }
+
+            if (!emailPattern.test(email)) {
+                alert("유효한 이메일 주소를 입력해주세요.");
+                event.preventDefault();
+                return;
+            }
+
+            if (password !== rePassword) {
+                alert("비밀번호가 일치하지 않습니다.");
+                event.preventDefault();
+                return;
+            }
+
+            if (!phonePattern.test(phone)) {
+                alert("전화번호 형식을 확인해주세요.");
+                event.preventDefault();
+                return;
+            }
+
+            alert("회원가입 성공");
+        });
+
+        $('[name="rePassword"]').on('input', function () {
+            const password = $('[name="password"]').val();
+            const rePassword = $(this).val();
+            const passwordMessage = $('#passwordStatus');
+
+            if (password !== rePassword) {
+                passwordMessage.text("비밀번호가 일치하지 않습니다.").css("color", "red");
+            } else {
+                passwordMessage.text("비밀번호가 일치합니다.").css("color", "green");
+            }
+        });
+
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || window.performance && window.performance.navigation.type === 2) {
+                const form = document.getElementById("registerForm");
+                if (form) {
+                    form.reset();
+                }
+                $('#useridStatus').text('');
+                $('#passwordStatus').text('');
+                $('#submitBtn').prop('disabled', true);
+            }
+        });
+
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function (data) {
+                    let addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+                    document.getElementById('zipCode').value = addr;
+                }
+            }).open();
+        }
+    </script>
+</body>
+
+</html>

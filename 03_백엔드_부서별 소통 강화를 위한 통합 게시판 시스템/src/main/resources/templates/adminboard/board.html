@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 작성</title>
+    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+    <style>
+        /* 전체적인 스타일 */
+        body {
+            font-family: 'Noto Sans KR', 'Arial', sans-serif;
+            /* 한글 Noto Sans KR, 영어 Arial */
+            background-color: #f4f7fb;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 2.5em;
+            color: #444;
+            font-family: 'Noto Sans KR', sans-serif;
+            /* 제목 폰트 */
+        }
+
+        /* 글 작성 폼 스타일 */
+        form {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px auto;
+            width: 80%;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        form input[type="text"],
+        form textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            font-size: 1em;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+            /* 입력창에서 한글을 Noto Sans KR로 */
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* 두 버튼에 공통으로 적용할 스타일 */
+        .form-buttons button,
+        .form-buttons .cancel-button {
+            padding: 12px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        /* 작성 버튼 스타일 */
+        .form-buttons button {
+            background-color: #007bff;
+        }
+
+        .form-buttons button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 취소 버튼 스타일 */
+        .form-buttons .cancel-button {
+            background-color: #6c757d;
+        }
+
+        .form-buttons .cancel-button:hover {
+            background-color: #5a6268;
+        }
+
+        /* CKEditor 스타일 */
+        .cke_editable {
+            background-color: #f9f9f9;
+            min-height: 200px;
+            font-family: 'Noto Sans KR', 'Arial', sans-serif;
+            /* CKEditor 편집기에도 동일 폰트 적용 */
+        }
+
+        /* 글 목록 스타일 */
+        hr {
+            border: 0;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 1.8em;
+            color: #444;
+            font-family: 'Noto Sans KR', sans-serif;
+            /* 글 목록 제목 */
+        }
+
+        .post {
+            background-color: #fff;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #007bff;
+            font-family: 'Noto Sans KR', sans-serif;
+            /* 글 목록의 내용도 Noto Sans KR */
+        }
+
+        .post strong {
+            font-size: 1.3em;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .post p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        /* 반응형 디자인: 작은 화면에서 편집기와 목록 크기 조정 */
+        @media (max-width: 768px) {
+            form {
+                width: 95%;
+            }
+
+            .post {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>{{boardName}} 글쓰기</h2>
+
+    <!-- 글 작성 폼 -->
+    <form action="/board/{{boardCode}}/post" method="post">
+        <input type="text" name="title" placeholder="제목"><br>
+        <textarea id="editor" name="content" placeholder="내용"></textarea><br>
+        <input type="hidden" name="user_id" value="{{userid}}">
+        <input type="hidden" name="user_name" value="{{user_name}}">
+        <div class="form-buttons">
+            <button type="submit">글 작성</button>
+            <a href="/admin/boardlist?boardCode={{boardCode}}" class="cancel-button">취소</a>
+        </div>
+    </form>
+
+    <script>
+        CKEDITOR.replace('editor');
+
+        CKEDITOR.replace('editor', {
+            extraPlugins: 'autogrow',
+            removePlugins: 'elementspath',
+            allowedContent: true,  // CKEditor에서 허용되는 태그를 제어
+            entities: false,  // HTML 엔티티를 사용하지 않도록 설정
+            entities_latin: false,
+            entities_greek: false,
+            // 기타 설정 추가
+        });
+
+    </script>
+
+    <hr>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,98 @@
+@charset "utf-8";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
+
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    background-color: #2d3e50;
+    color: #fff;
+    padding: 20px;
+    position: fixed;
+    font-size: 14px;
+    border-right: 2px solid #34495e;
+}
+
+.sidebar h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #bdc3c7;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin: 15px 0;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #ecf0f1;
+    font-size: 15px;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebar ul li a:hover {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 240px; /* 사이드바 너비만큼 오른쪽으로 */
+    right: 0;
+    height: 80px;
+    background-color: #34495e;
+    color: #ecf0f1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+.navbar.transparent {
+    /* 스크롤 내리면 투명해짐 */
+    background-color: rgba(45, 62, 80, 0.5);
+}
+
+.navbar .welcome-text {
+    margin-right: 20px;
+    font-weight: 500;
+    margin-right: 20px; /* 사용자 이름과 로그아웃 버튼 사이 간격 */
+    margin-left: 20px; /* 메인페이지와 사용자 이름 사이 간격 */
+}
+
+.navbar.logged-in .welcome-text {
+    color: #fff;
+    /* 로그인 상태일 때 텍스트를 흰색으로 변경 */
+}
+
+.navbar .nav-link {
+    color: #ecf0f1;
+    margin-left: 20px; /* 각 버튼 간 간격 */
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.navbar .nav-link:hover {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.main-content {
+    margin-left: 240px;
+    /* 사이드바 너비 */
+    margin-top: 80px;
+    /* nav 높이 */
+    padding: 20px;
+}

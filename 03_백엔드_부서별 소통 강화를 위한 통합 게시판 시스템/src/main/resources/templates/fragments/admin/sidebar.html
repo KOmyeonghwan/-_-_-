@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- 사이드바 -->
+
+    <div class="sidebar">
+        <h2>관리자 메뉴</h2>
+        <ul>
+            {{#menuItems}}
+            <li>
+                {{#hasSub}}
+                <!-- 상위 메뉴 (하위 메뉴 펼침 가능) -->
+                <span class="toggle-submenu" style="cursor:pointer;">{{title}}</span>
+                <ul class="submenu" style="display: none;">
+                    {{#subItems}}
+                    <li><a href="{{url}}">{{title}}</a></li>
+                    {{/subItems}}
+                </ul>
+                {{/hasSub}}
+        
+                {{^hasSub}}
+                <!-- 그냥 단독 메뉴 -->
+                <a href="{{url}}">{{title}}</a>
+                {{/hasSub}}
+            </li>
+            {{/menuItems}}
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".toggle-submenu").forEach(el => {
+                el.addEventListener("click", function () {
+                    const submenu = this.nextElementSibling;
+
+                    // Toggle the submenu visibility
+                    if (submenu.style.display === "none" || submenu.style.display === "") {
+                        submenu.style.display = "block";
+                    } else {
+                        submenu.style.display = "none";
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

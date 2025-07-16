@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .main-content {
+            width: 100%;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-section {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .content {
+            background-color: #ffffff;
+            padding: 40px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 30px 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #333;
+        }
+
+        .content h1 {
+            font-size: 1.2em;
+            font-weight: 400;
+            line-height: 1.7;
+            white-space: pre-line;
+            /* 줄바꿈 유지 */
+            margin: 0;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 30px;
+            padding: 10px 0;
+        }
+
+        .post-header h2 {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+            text-align: center;
+        }
+
+        .nav-buttons {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .nav-buttons a {
+            margin-left: 10px;
+            padding: 8px 14px;
+            background-color: #3498db;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        .nav-buttons a:hover {
+            background-color: #3498db;
+        }
+
+        .post-details {
+            background-color: #fff;
+            padding: 40px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            /* 부드러운 그림자 */
+            border-radius: 12px;
+            /* 둥근 모서리 */
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            /* 마우스 오버시 효과 */
+        }
+
+        /* 제목 스타일 */
+        .post-details h2 {
+            font-size: 2.8em;
+            /* 크기 키우기 */
+            color: #2c3e50;
+            /* 어두운 제목 색상 */
+            font-weight: 700;
+            /* 더 두꺼운 제목 */
+            margin-bottom: 20px;
+            /* 아래 여백 */
+            text-align: center;
+            /* 중앙 정렬 */
+            letter-spacing: 1px;
+            /* 글자 간격 */
+            text-transform: uppercase;
+            /* 대문자로 변환 */
+
+            /* 아래에 강조선 추가 */
+            padding-bottom: 10px;
+            /* 강조선과 제목 간의 여백 */
+        }
+
+        .post-details p {
+            font-size: 1.15em;
+            /* 기본 폰트 크기 */
+            color: #555;
+            /* 부드러운 회색 색상 */
+            line-height: 1.8;
+            /* 줄 간격 늘리기 */
+            margin: 15px 0;
+            /* 위아래 여백 */
+            text-align: justify;
+            /* 양쪽 정렬 */
+            text-indent: 30px;
+            /* 첫 줄 들여쓰기 */
+        }
+
+        .post-details p span {
+            font-weight: bold;
+            /* 강조할 텍스트 볼드 */
+            color: #3498db;
+            /* 강조 색상 */
+        }
+
+        .comment-section {
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .comment-section h3 {
+            font-size: 1.6em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comment-form textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            font-size: 1em;
+            resize: none;
+            /* 크기 조정 비활성화 (원하면 활성화 가능) */
+            margin-bottom: 10px;
+        }
+        
+        .comment-submit-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .comment-form button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            width: auto;
+            margin-top: 10px;
+        }
+
+        .comment-form button:hover {
+            background-color: #2980b9;
+        }
+
+        .comments-list {
+            margin-top: 20px;
+        }
+
+        .comment-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .comment-item .comment-user {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .comment-item .comment-date {
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .comment-item .comment-text {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        .comment-delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .comment-item div:last-child {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+
+        .comment-delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+
+        .post-list {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 40px;
+        }
+
+        .post-list h3 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .post-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .post-list li {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .post-list li a {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .post-list li a:hover {
+            color: #2980b9;
+        }
+
+        .post-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .post-title {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .post-title a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .post-user {
+            width: 120px;
+            text-align: center;
+            color: #666;
+        }
+
+        .post-date {
+            width: 100px;
+            text-align: right;
+            color: #999;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            /* 페이지 버튼 간격 */
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .pagination a:hover {
+            background-color: #2980b9;
+        }
+
+        .pagination a.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            /* 오른쪽 정렬  */
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .edit-btn {
+            background-color: #3498db;
+            /* 수정 버튼의 배경색 */
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+
+        }
+
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* 마우스 오버시 색상 변화 */
+        .edit-btn:hover {
+            background-color: #2980b9;
+            /* 수정 버튼 호버 색상 */
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+            /* 삭제 버튼 호버 색상 */
+        }
+    </style>
+</head>
+
+<body>
+
+    {{> fragments/user/navbar}}
+
+    <div class="main-content">
+        <section class="post-details">
+
+            <div class="post-header">
+                <div class="nav-buttons">
+                    {{#previousPost}}
+                    <a href="/board/view/{{previousPost.id}}?boardCode={{boardCode}}" class="prev-post-btn">이전글</a>
+                    {{/previousPost}}
+                    {{^previousPost}}
+                    <!-- <span>이전글 없음</span> -->
+                    {{/previousPost}}
+
+                    {{#nextPost}}
+                    <a href="/board/view/{{nextPost.id}}?boardCode={{boardCode}}" class="next-post-btn">다음글</a>
+                    {{/nextPost}}
+                    {{^nextPost}}
+                    <!-- <span>다음글 없음</span> -->
+                    {{/nextPost}}
+
+
+                    <a href="/boards/{{boardCode}}" class="btn-list">목록</a>
+                </div>
+                <h2>{{title}}</h2>
+            </div>
+            <hr>
+
+            <div class="main-section">
+                <p>조회 {{views}}</p>
+                <p>작성일 {{created_at}}</p>
+                <p>작성자 {{user_name}}</p>
+            </div>
+
+            <hr>
+
+
+            <div class="content">
+                <h1>{{{content}}}</h1>
+            </div>
+
+
+            {{#isAuthor}}
+            <div class="action-buttons">
+                <a href="/board/edit/{{id}}?boardCode={{boardCode}}" class="action-btn edit-btn">수정</a>
+                <form action="/delete/{{boardCode}}/{{id}}" method="post" style="display:inline;">
+                    <button type="submit" class="action-btn delete-btn">삭제</button>
+                </form>
+            </div>
+            {{/isAuthor}}
+
+        </section>
+
+        <!-- 댓글 섹션 -->
+        <div class="comment-section">
+            <h2 style="text-align: center;">댓글</h2>
+
+            <div class="comments-list" id="comments-list">
+                {{#comments}}
+                <div class="comment-item" data-comment-id="{{id}}" data-board-code="{{boardCode}}">
+                    <div class="comment-user">{{user_name}}</div>
+                    <div class="comment-date">{{created_at}}</div> <!-- 날짜가 이미 yyyy-dd-MM 형식으로 변환됨 -->
+                    <div class="comment-text">{{content}}</div>
+
+                    {{#isAuthor}}
+                    <button class="comment-delete-btn">삭제</button>
+                    {{/isAuthor}}
+                </div>
+                {{/comments}}
+            </div>
+
+            {{#isLoggedIn}}
+            <div class="comment-form">
+                <textarea placeholder="댓글을 작성하세요..." id="comment-input"></textarea>
+                <div class="comment-submit-wrapper">
+                    <button id="submit-comment">댓글 작성</button>
+                </div>
+            </div>
+            {{/isLoggedIn}}
+
+            {{^isLoggedIn}}
+            <div class="comment-form">
+                <p>※ 댓글 작성은 <a href="/login">로그인</a> 후 이용 가능합니다.</p>
+            </div>
+            {{/isLoggedIn}}
+
+        </div>
+
+
+
+
+
+
+
+        <!-- 게시물 목록 추가 섹션 -->
+        <section class="post-list">
+            <h3 style="text-align: center;">전체 글 목록</h3>
+            <div class="post-content">
+                {{#boardContent}}
+                <div class="post-row">
+                    <div class="post-title">
+                        <a href="/board/view/{{id}}?boardCode={{boardCode}}">{{title}}</a>
+                    </div>
+                    <div class="post-user">
+                        <p>{{user_name}}</p>
+                    </div>
+                    <div class="post-date">
+                        <p>{{created_at}}</p>
+                    </div>
+                </div>
+                {{/boardContent}}
+            </div>
+        </section>
+
+
+    </div>
+
+
+    {{> fragments/user/footer}}
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteForm = document.querySelector('form[action^="/delete/"]');
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function (e) {
+                    const confirmed = confirm('정말로 삭제하시겠습니까?');
+                    if (!confirmed) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const boardCode = '{{boardCode}}';  // 게시판 코드
+            const postId = "{{id}}";            // 게시물 ID
+
+            // 댓글 불러오기
+            loadComments(boardCode, postId);
+
+            function loadComments(boardCode, postId) {
+                $.ajax({
+                    url: '/comment/list',
+                    method: 'GET',
+                    data: {
+                        boardCode: boardCode,
+                        postId: postId
+                    },
+                    success: function (response) {
+                        const commentsList = document.getElementById('comments-list');
+                        commentsList.innerHTML = '';
+
+                        response.forEach(comment => {
+                            const commentItem = document.createElement('div');
+                            commentItem.classList.add('comment-item');
+                            commentItem.setAttribute('data-comment-id', comment.id);
+                            commentItem.setAttribute('data-board-code', boardCode);
+
+                            const userName = document.createElement('div');
+                            userName.classList.add('comment-user');
+                            userName.textContent = comment.user_name;
+
+                            const commentDate = document.createElement('div');
+                            commentDate.classList.add('comment-date');
+
+                            // 날짜 포맷을 yyyy-mm-dd로 변경
+                            const date = new Date(comment.created_at);
+                            const formattedDate = date.toISOString().split('T')[0]; // yyyy-mm-dd 포맷으로 변환
+                            commentDate.textContent = formattedDate;
+
+                            const commentText = document.createElement('div');
+                            commentText.classList.add('comment-text');
+                            commentText.textContent = comment.content;
+
+                            // ✅ 삭제 버튼 포함할 div 생성
+                            const commentFooter = document.createElement('div');
+                            commentFooter.style.display = 'flex';
+                            commentFooter.style.justifyContent = 'flex-end';
+
+                            if (comment.isAuthor) {
+                                const deleteButton = document.createElement('button');
+                                deleteButton.classList.add('comment-delete-btn');
+                                deleteButton.textContent = '삭제';
+                                commentFooter.appendChild(deleteButton);
+                            }
+
+                            // 요소 순서대로 추가
+                            commentItem.appendChild(userName);
+                            commentItem.appendChild(commentDate);
+                            commentItem.appendChild(commentText);
+                            commentItem.appendChild(commentFooter);  // ✅ 댓글 박스 안쪽에 삭제 버튼 포함
+
+                            commentsList.appendChild(commentItem);
+                        });
+                    },
+                    error: function () {
+                        alert('댓글을 불러오는 데 실패했습니다.');
+                    }
+                });
+            }
+
+            // 댓글 작성 버튼 클릭 시
+            document.getElementById('submit-comment').addEventListener('click', function () {
+                const content = document.getElementById('comment-input').value;
+
+                const isLoggedIn = "{{isLoggedIn}}" === "true"; // 문자열 비교로 변환
+                if (!isLoggedIn) {
+                    const btn = document.getElementById('submit-comment');
+                    btn.disabled = true;
+                    btn.innerText = "로그인 후 작성 가능";
+                    btn.style.cursor = "not-allowed";
+                    btn.addEventListener("click", () => {
+                        alert("로그인 후 댓글을 작성할 수 있습니다.");
+                        window.location.href = "/login";
+                    });
+                }
+
+                if (!content) {
+                    alert('댓글 내용을 입력해주세요.');
+                    return;
+                }
+
+                // 댓글 작성 API 호출
+                $.ajax({
+                    url: '/comment/add',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        boardCode: boardCode,
+                        postId: postId,
+                        content: content
+                    }),
+                    success: function (response) {
+                        loadComments(boardCode, postId); // 댓글 작성 후 댓글 목록 새로 고침
+                        document.getElementById('comment-input').value = ''; // 입력 필드 초기화
+                    },
+                    error: function (error) {
+                        alert("댓글 작성에 실패했습니다.");
+                    }
+                });
+            });
+        });
+
+
+        // 예시: 삭제 버튼 클릭 시 Ajax 요청
+        document.getElementById('comments-list').addEventListener('click', function (e) {
+            if (e.target.classList.contains('comment-delete-btn')) {
+                const commentItem = e.target.closest('.comment-item');
+                const commentId = commentItem.getAttribute('data-comment-id');
+                const boardCode = commentItem.getAttribute('data-board-code');
+
+                if (!confirm('댓글을 삭제하시겠습니까?')) return;
+
+                $.ajax({
+                    url: '/comment/delete/' + commentId,
+                    method: 'POST',
+                    data: { boardCode: boardCode },
+                    success: function (response) {
+                        if (response.success) {
+                            commentItem.remove();
+                        } else {
+                            alert(response.message || '삭제 실패');
+                        }
+                    },
+                    error: function () {
+                        alert('서버 오류로 삭제 실패');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

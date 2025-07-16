@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>게시글 목록</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+    <link href="/statictotal/css/total.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #eef1f4;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+            width: calc(100% - 240px);
+            background-color: #fff;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* 게시판 탭 버튼 */
+
+        .main-content .tab-menu button {
+            background-color: #2d3e50;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            margin-right: 8px;
+            height: 40px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .main-content a button:hover {
+            background-color: #3498db;
+        }
+
+        /* 검색 폼 부분 */
+        .search-main {
+            flex: 1;
+            text-align: right;
+            /* 우측 정렬 */
+        }
+
+        .search-main form {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-main input {
+            padding: 8px;
+            font-size: 14px;
+            margin-right: 8px;
+            /* 버튼과 간격을 띄우기 위해 추가 */
+        }
+
+        .search-main button {
+            padding: 8px 16px;
+            background-color: #2d3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-main button:hover {
+            background-color: #3498db;
+        }
+
+        /* 게시글 테이블 */
+        .member-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .member-table th,
+        .member-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .member-table th {
+            background-color: #34495e;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .id {
+            width: 6%;
+        }
+
+        .title {
+            width: 45%;
+            text-align: left;
+        }
+
+        .writer {
+            width: 14%;
+        }
+
+        .date {
+            width: 15%;
+        }
+
+        .views {
+            width: 8%;
+        }
+
+        .action {
+            width: 15%;
+        }
+
+        .member-table td.title {
+            text-align: left;
+        }
+
+        .member-table td:nth-child(2) a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .member-table tr:hover {
+            background-color: #f2f4f6;
+        }
+
+        .member-table td button {
+            padding: 6px 12px;
+            font-size: 13px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        /* 수정 버튼 */
+        .member-table td a button {
+            background-color: #3498db;
+            color: white;
+            margin-right: 5px;
+        }
+
+        .member-table td a button:hover {
+            background-color: #2980b9;
+        }
+
+        /* 삭제 버튼 */
+        .member-table td form button {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .member-table td form button:hover {
+            background-color: #c0392b;
+        }
+
+        p {
+            margin-top: 20px;
+            color: #888;
+            font-size: 15px;
+        }
+
+        .write-btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .write-btn {
+            background-color: #2d3e50;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .write-btn:hover {
+            background-color: #3498db;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 20px;
+        }
+
+        .page-link {
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .page-link:hover {
+            background-color: #f0f0f0;
+        }
+
+        .page-link.active {
+            background-color: #2d3e50;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- nav -->
+    {{> fragments/admin/nav}}
+
+    <!-- 사이드바 -->
+    {{> fragments/admin/sidebar}}
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <h1>{{boardName}}</h1>
+
+        <!-- 게시판 탭과 검색 폼을 flex로 정렬 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <!-- 게시판 탭 (왼쪽에 배치) -->
+            <div style="flex: 1; display: flex; align-items: center;">
+                {{#boards}}
+                <a class="tab-menu" href="/admin/boardlist?boardCode={{boardCode}}">
+                    <button type="button">
+                        {{boardName}}
+                    </button>
+                </a>
+                {{/boards}}
+            </div>
+
+            <!-- 검색 폼 (오른쪽에 배치) -->
+            <div class="search-main" style="flex: 1; display: flex; justify-content: flex-end; align-items: center;">
+                <form action="/admin/boardlist" method="get" style="display: flex; gap: 8px;">
+                    
+                    <input type="hidden" name="boardCode" value="{{boardCode}}">
+
+                    <!-- 검색 조건 선택 (boolean)-->
+                    <select name="searchType" style="padding: 8px; font-size: 14px;">
+                        <option value="title" {{#isTitleSearch}}selected{{/isTitleSearch}}>제목</option>
+                        <option value="user_name" {{#isWriterSearch}}selected{{/isWriterSearch}}>작성자</option>
+                    </select>
+
+                    <!-- 검색어 입력 -->
+                    <input name="search" placeholder="검색어 입력" style="padding: 8px; font-size: 14px;" type="text"
+                        value="{{search}}">
+
+                    <button class="member-register" type="submit">검색</button>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- 게시글 테이블 -->
+        <table class="member-table">
+            <thead>
+                <tr>
+                    <th class="id">번호</th>
+                    <th class="title">제목</th>
+                    <th class="writer">작성자</th>
+                    <th class="date">작성일</th>
+                    <th class="views">조회수</th>
+                    <th class="action">비고</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#posts}}
+                <tr>
+                    <td class="id">{{number}}</td>
+                    <td class="title"><a href="/admin/boardview/{{id}}?boardCode={{boardCode}}">{{title}}</a></td>
+                    <td class="writer">{{user_name}}</td>
+                    <td class="date">{{created_at}}</td>
+                    <td class="views">{{views}}</td>
+                    <td class="action">
+                        <a href="/admin/boardedit/{{id}}?boardCode={{boardCode}}">
+                            <button class="edit-btn" type="button">수정</button>
+                        </a>
+                        <form action="/board/delete/{{id}}" method="post" style="display:inline;">
+                            <input name="boardCode" type="hidden" value="{{boardCode}}" />
+                            <button class="delete-btn" onclick="return confirm('정말 삭제하시겠습니까?');" type="submit">삭제
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {{/posts}}
+            </tbody>
+        </table>
+
+        {{^posts}}
+        <p>게시글이 없습니다.</p>
+        {{/posts}}
+
+        <div class="write-btn-container">
+            <a class="write-btn" href="/board/write?boardCode={{boardCode}}">
+                글쓰기
+            </a>
+        </div>
+
+        <div class="pagination">
+            {{#pageList}}
+            <a class="page-link {{#active}}active{{/active}}"
+                href="/admin/boardlist?boardCode={{boardCode}}&search={{search}}&page={{num}}">
+                {{num}}
+            </a>
+            {{/pageList}}
+        </div>
+
+    </div>
+
+</body>
+
+</html>

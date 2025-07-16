@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사내 게시판 메인</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            text-decoration: none;
+            /* color: #f000; */
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .main-content {
+            margin: 0 auto;
+            width: 1500px;
+        }
+
+        .profile {
+            justify-content: space-between;
+            display: flex;
+            margin: 30px 0;
+        }
+
+        .profile-card {
+            width: 300px;
+            background-color: #f0f4f8;
+            border: 2px solid #d0d7de;
+            border-radius: 8px;
+
+            /* 네모 형태 유지하되 살짝 부드럽게 */
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            margin: 40px auto;
+        }
+
+        .profile-card a {
+            text-decoration: none;
+            color: #4a90e2;
+        }
+
+        .profile-icon a {
+            text-decoration: none;
+            color: #4a90e2;
+        }
+
+        .profile-icon i {
+            font-size: 60px;
+            color: #4a90e2;
+            margin-bottom: 15px;
+        }
+
+        .name {
+            font-size: 22px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .email {
+            font-size: 16px;
+            color: #34495e;
+        }
+
+        .email i {
+            margin-right: 8px;
+            color: #4a90e2;
+        }
+
+
+
+        .middle-section {
+            display: flex;
+            gap: 30px;
+            width: 1000px;
+        }
+
+        .calendar-container {
+            flex: 1.2;
+            background-color: #ffffff;
+            padding: 25px 30px;
+            border-radius: 16px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+            /* 높이 좀 더 넉넉하게 설정 */
+            height: 460px;
+            overflow: hidden;
+        }
+
+        #calendar {
+            max-width: 100%;
+            height: 100% !important;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow-y: auto;
+            color: #222e50;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-item {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .grid-item h2 {
+            text-align: center;
+        }
+
+        .board-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+        }
+
+        .board-table thead {
+            background-color: #f2f2f2;
+        }
+
+        .board-table th,
+        .board-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .board-table th {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .board-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .board-table a {
+            text-decoration: none;
+            color: #0066cc;
+        }
+
+        .board-table a:hover {
+            text-decoration: underline;
+            color: #004a99;
+        }
+
+        main section {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .new-icon {
+            display: inline-block;
+            background-color: red;
+            color: white;
+            font-size: 0.7em;
+            padding: 2px 5px;
+            margin-left: 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    {{> fragments/user/navbar}}
+    {{> fragments/user/chatnote}}
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        <main>
+            <div class="main-content">
+                <section class="profile">
+                    {{#isLoggedIn}}
+                    <div class="profile-card">
+                        <div class="profile-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h2 class="name">{{loginUser.userName}}</h2>
+
+                        <p class="department" style="font-size: 20px;">
+                            <i class="fas fa-users"></i> {{loginUser.department.deptName}}
+                        </p>
+
+                        <p class="email" style="font-size: 20px; ">
+                            <i class="fas fa-envelope"></i> {{loginUser.userEmail}}
+                        </p>
+
+                        <a href="/mypage-content" id="mypage-link" title="마이페이지"><i
+                                class="fa-solid fa-user"></i>마이페이지</a>
+                        <a href="/logout" title="로그아웃">로그아웃</a>
+                    </div>
+
+                    {{/isLoggedIn}}
+
+                    {{^isLoggedIn}}
+                    <div class="profile-card">
+                        <div class="profile-icon">
+                            <i class="fas fa-user-circle"></i><br>
+                            로그인후 정보를 획인할수 있습니다.
+                            <a href="/login" title="로그인">로그인</a>
+                            <a href="/register" title="회원가입">회원가입</a>
+                        </div>
+                    </div>
+                    {{/isLoggedIn}}
+                    <div class="middle-section">
+                        <div class="calendar-container">
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <div class="grid-layout">
+                    {{#fixedBoardList}}
+                    <section class="grid-item">
+                        <h2>{{boardName}}</h2>
+                        <table class="board-table">
+                            <thead>
+                                <tr>
+                                    <th>제목</th>
+                                    <th>날짜</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#posts}}
+                                <tr>
+                                    <td><a href="/board/view/{{id}}?boardCode={{boardCode}}">{{title}}</a></td>
+                                    <td><small>{{date}}</small></td>
+                                </tr>
+                                {{/posts}}
+                            </tbody>
+                        </table>
+                    </section>
+                    {{/fixedBoardList}}
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 푸터 -->
+    {{> fragments/user/footer}}
+
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: '100%',
+            contentHeight: 'auto',
+            headerToolbar: {
+                left: 'title',
+                center: '',
+                right: 'today prev,next'
+            },
+            buttonText: {
+                today: 'Today',
+                prev: '⏴',
+                next: '⏵'
+            },
+            selectable: true,
+            dayMaxEvents: true,
+            events: []
+        });
+        calendar.render();
+    });
+
+    $('#mypage-link').on('click', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: '/mypage-content',  // 서버에서 위의 조각 HTML 반환
+            method: 'GET',
+            success: function (data) {
+                $('.main-content').html(data);
+            },
+            error: function () {
+                alert('마이페이지 정보를 불러오지 못했습니다.');
+            }
+        });
+    });
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // 오늘 날짜 구하기 (YYYY-MM-DD 형식)
+        const today = new Date().toISOString().split('T')[0];
+
+        // 모든 게시글 행을 순회
+        document.querySelectorAll(".board-table tbody tr").forEach(row => {
+            const dateCell = row.querySelector("td small");  // 날짜 셀
+            const titleLink = row.querySelector("td a");     // 제목 링크
+
+            if (dateCell && titleLink) {
+                const postDate = dateCell.textContent.trim();  // 게시글의 날짜
+
+                // 날짜가 오늘이면 'N' 아이콘 추가
+                if (postDate === today) {
+                    const nIcon = document.createElement("span");
+                    nIcon.textContent = "N";       // 아이콘 텍스트
+                    nIcon.classList.add("new-icon"); // 스타일 클래스
+
+                    titleLink.appendChild(nIcon);  // 제목 링크 안에 'N' 아이콘 추가
+                }
+            }
+        });
+    });
+</script>
+
+</html>

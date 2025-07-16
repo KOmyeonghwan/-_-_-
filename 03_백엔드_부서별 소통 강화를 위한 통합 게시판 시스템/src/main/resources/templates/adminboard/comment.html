@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>댓글 관리</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/statictotal/css/total.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <style>
+        /* 기존 스타일 유지 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #eef1f4;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+            width: calc(100% - 240px);
+            background-color: #fff;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .tab-menu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #34495e;
+        }
+
+        .tab-menu button {
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #34495e;
+            border-bottom: 3px solid transparent;
+            transition: border-color 0.3s ease;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tab-menu button.active {
+            border-color: #2c82c9;
+            color: #2c82c9;
+            background-color: #eef6fc;
+        }
+
+        .group-container {
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px 20px;
+            background-color: #fdfdfd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .group-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .group-title i {
+            transition: transform 0.3s ease;
+        }
+
+        .group-title.collapsed i {
+            transform: rotate(90deg);
+        }
+
+        .comments {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .comment {
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+        }
+
+        .comment:first-child {
+            border-top: none;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .comment-content {
+            font-size: 15px;
+            color: #333;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* 페이지네이션 */
+        #pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .pagination {
+            list-style: none;
+            display: flex;
+            gap: 6px;
+            padding: 0;
+        }
+
+        .pagination li a {
+            display: inline-block;
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .pagination li.active a {
+            background-color: #2d3e50;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    {{> fragments/admin/nav }}
+    {{> fragments/admin/sidebar }}
+
+    <div class="main-content">
+        <h1>댓글 관리</h1>
+
+        <div class="tab-menu" id="tabMenu">
+            {{#boards}}
+            <button data-code="{{boardCode}}">{{boardName}}</button>
+            {{/boards}}
+        </div>
+
+        <div id="comment-list">
+            <p>게시판을 선택하세요.</p>
+        </div>
+
+        <div id="pagination"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            const $tabButtons = $("#tabMenu button");
+            const $list = $("#comment-list");
+            const $pagination = $("#pagination");
+            let currentBoardCode = null;
+
+            function fetchComments(boardCode, page = 1) {
+                $.getJSON("/comment/admin/list", { boardCode, page }, function (response) {
+                    const data = response.data || [];
+                    const totalPages = response.totalPages || 1;
+                    const currentPage = response.currentPage || 1;
+
+                    $list.empty();
+
+                    if (!data.length) {
+                        $list.html("<p>댓글이 없습니다.</p>");
+                        $pagination.empty();
+                        return;
+                    }
+
+                    data.forEach(postGroup => {
+                        const title = postGroup.postTitle || "제목 없음";
+                        const displayIndex = postGroup.displayIndex;
+
+                        const $group = $(`
+                            <div class="group-container">
+                                <div class="group-title">[#${displayIndex}] ${title} <i class="fas fa-chevron-down"></i></div>
+                                <div class="comments"></div>
+                            </div>
+                        `);
+
+                        const $comments = $group.find(".comments");
+
+                        postGroup.comments.forEach(comment => {
+                            const dateOnly = comment.created_at.split("T")[0];
+                            const $comment = $(`
+                                <div class="comment">
+                                    <div class="comment-header">
+                                        <span><strong>${comment.user_name}</strong> • ${dateOnly}</span>
+                                        <button class="delete-btn" data-id="${comment.id}">삭제</button>
+                                    </div>
+                                    <div class="comment-content">${comment.content}</div>
+                                </div>
+                            `);
+                            $comments.append($comment);
+                        });
+
+                        $list.append($group);
+                    });
+
+                    // 페이지네이션
+                    $pagination.empty();
+                    const $ul = $("<ul class='pagination'></ul>");
+                    for (let i = 1; i <= totalPages; i++) {
+                        const $li = $("<li></li>");
+                        const $a = $(`<a href="#">${i}</a>`);
+                        if (i === currentPage) $li.addClass("active");
+                        $a.on("click", function (e) {
+                            e.preventDefault();
+                            fetchComments(boardCode, i);
+                        });
+                        $li.append($a);
+                        $ul.append($li);
+                    }
+                    $pagination.append($ul);
+                });
+            }
+
+            $tabButtons.on("click", function () {
+                $tabButtons.removeClass("active");
+                $(this).addClass("active");
+                currentBoardCode = $(this).data("code");
+                fetchComments(currentBoardCode, 1);
+            });
+
+            // 댓글 삭제
+            $("#comment-list").on("click", ".delete-btn", function () {
+                if (!confirm("정말 삭제하시겠습니까?")) return;
+                const commentId = $(this).data("id");
+                $.post(`/comment/delete/${commentId}`, { boardCode: currentBoardCode }, function (res) {
+                    if (res.success) {
+                        alert("삭제 완료");
+                        fetchComments(currentBoardCode, 1);
+                    } else {
+                        alert("삭제 실패: " + res.message);
+                    }
+                }).fail(() => {
+                    alert("삭제 중 오류 발생");
+                });
+            });
+
+            // 접기/펼치기
+            $("#comment-list").on("click", ".group-title", function () {
+                const $title = $(this);
+                const $icon = $title.find("i");
+                const $comments = $title.next(".comments");
+
+                $comments.slideToggle(200, function () {
+                    if ($comments.is(":visible")) {
+                        $icon.removeClass("fa-chevron-down").addClass("fa-chevron-up");
+                    } else {
+                        $icon.removeClass("fa-chevron-up").addClass("fa-chevron-down");
+                    }
+                });
+            });
+            
+            // 첫 번째 탭 자동 클릭
+            if ($tabButtons.length > 0) $tabButtons.first().click();
+        });
+    </script>
+</body>
+
+</html>

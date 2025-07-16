@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>게시글 상세보기</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+    <link href="/statictotal/css/total.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #eef1f4;
+            margin: 0;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+            width: calc(100% - 240px);
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .detail-box {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: #fafafa;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+        }
+
+        .detail-item strong {
+            display: inline-block;
+            width: 80px;
+            color: #555;
+        }
+
+        .detail-content {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
+        .button-group {
+             display: flex;
+             justify-content: space-between;
+             margin-top: 10px; /* 버튼 그룹과 상세보기 박스 사이의 간격 */
+        }
+
+        .button-group .left-btns {
+            display: flex;
+        }
+
+        .button-group .right-btns {
+            display: flex;
+        }
+
+        .button-group button {
+            background-color: #2d3e50;
+            color: white;
+            padding: 8px 16px;
+            margin-left: 8px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button-group button:hover {
+            background-color: #3498db;
+        }
+
+        .button-group .delete-btn {
+            background-color: #e74c3c;
+        }
+
+        .button-group .delete-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+<!-- nav -->
+{{> fragments/admin/nav}}
+
+<!-- 사이드바 -->
+{{> fragments/admin/sidebar}}
+
+<!-- 메인 컨텐츠 -->
+<div class="main-content">
+    <h1>게시글 상세보기</h1>
+
+    <div class="detail-box">
+        <div class="detail-item">{{boardName}}</div>
+        <div class="detail-item"><strong>제목:</strong> {{post.title}}</div>
+        <div class="detail-item"><strong>작성자:</strong> {{post.user_name}}</div>
+        <div class="detail-item"><strong>작성일:</strong> {{post.created_at}}</div>
+
+        <div class="detail-content">
+            {{{post.content}}}
+        </div>
+    </div>
+
+    <!-- 버튼 그룹 -->
+    <div class="button-group">
+        <!-- 왼쪽 하단: 목록 버튼 -->
+        <div class="left-btns">
+            <a href="/admin/boardlist?boardCode={{boardCode}}">
+                <button type="button">목록</button>
+            </a>
+        </div>
+
+        <!-- 오른쪽 하단: 글쓰기, 수정, 삭제 버튼 -->
+        <div class="right-btns">
+            <!-- 글쓰기 버튼 추가 -->
+            <a href="/board/write?boardCode={{boardCode}}">
+                <button type="button">글쓰기</button>
+            </a>
+            <a href="/admin/boardedit/{{post.id}}?boardCode={{boardCode}}">
+                <button type="button">수정</button>
+            </a>
+            <form action="/board/delete/{{post.id}}" method="post" style="display:inline;">
+                <input name="boardCode" type="hidden" value="{{boardCode}}">
+                <button class="delete-btn" onclick="return confirm('정말 삭제하시겠습니까?');" type="submit">삭제</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>

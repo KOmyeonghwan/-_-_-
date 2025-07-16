@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판 관리</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/statictotal/css/total.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #eef1f4;
+        }
+
+        /* 메인 컨텐츠 */
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+            width: calc(100% - 240px);
+            background-color: #fff;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* 회원 관리 테이블 */
+        .member-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .member-table th,
+        .member-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .member-table th {
+            background: #34495e;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .member-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .member-table tr:hover {
+            background: #ecf0f1;
+        }
+
+        .member-table td button {
+            padding: 8px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background-color: #3498db;
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+
+        .member-table td button.delete-btn {
+            background-color: #e74c3c;
+        }
+
+        .member-table td button:hover {
+            background-color: #2980b9;
+        }
+
+        .member-table td button.delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .member-register {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #2d3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .member-register:hover {
+            background-color: #3498db;
+        }
+
+        .bottom-controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .pagination {
+            list-style: none;
+            display: flex;
+            gap: 5px;
+            padding: 0;
+        }
+
+        .pagination li a {
+            display: inline-block;
+            padding: 8px 12px;
+            background-color: #2d3e50;
+            color: #fff;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        .pagination li.active a,
+        .pagination li a:hover {
+            background-color: #3498db;
+        }
+
+        .member-register {
+            padding: 10px 20px;
+            background-color: #2d3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+
+        .member-register:hover {
+            background-color: #3498db;
+        }
+
+        /* 팝업 스타일 */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 400px;
+            text-align: center;
+        }
+
+        .popup-content h3 {
+            margin-bottom: 20px;
+        }
+
+        .popup-content form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .popup-content button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .popup-content button.cancel-btn {
+            background-color: #ccc;
+        }
+
+        .popup-content button.confirm-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .popup-content button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- nav -->
+    {{> fragments/admin/nav}}
+
+    <!-- 사이드바 -->
+    {{> fragments/admin/sidebar}}
+
+    <!-- 메인 컨텐츠 -->
+    <div class="main-content">
+        <h1>게시판 관리</h1>
+
+        <!-- 게시판 목록 추가 -->
+        <section style="margin-top: 40px;">
+            <h2 style="font-size: 22px; color: #2d3e50; margin-bottom: 20px;">게시판 목록</h2>
+            <ul style="list-style: none; padding: 0;">
+                {{#boards}}
+                <li
+                    style="display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid #ddd;">
+                    <span style="font-size: 16px;">{{boardName}}</span>
+
+                    <div>
+                        <a href="/admin/boardlist?boardCode={{boardCode}}" target="_blank">
+                            <button type="button"
+                                style="padding: 6px 12px; margin-right: 5px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                보기
+                            </button>
+                        </a>
+
+                        <form action="/admin/board/{{boardCode}}/delete" method="post" style="display:inline;">
+                            <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?');"
+                                style="padding: 6px 12px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                삭제
+                            </button>
+                        </form>
+                    </div>
+                </li>
+                {{/boards}}
+
+            </ul>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button type="button" class="member-register" id="createBoardBtn"
+                    style="padding: 10px 20px; background-color: #2d3e50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    새 게시판 만들기
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-content">
+            <h3>새 게시판 만들기</h3>
+            <form action="/admin/board/create" method="POST" id="createBoardForm">
+                <input type="text" name="boardCode" placeholder="게시판 코드" required>
+                <input type="text" name="boardName" placeholder="게시판 이름" required>                    
+                <div>
+                    <button type="submit" class="confirm-btn">만들기</button>
+                    <button type="button" class="cancel-btn" id="cancelBtn">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const deleteButtons = document.querySelectorAll(".delete-btn");
+
+            deleteButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    const boardCode = this.getAttribute("data-boardcode");
+
+                    if (confirm(`정말로 ${boardCode} 게시판을 삭제하시겠습니까?`)) {
+                        fetch(`/admin/board/${boardCode}/delete`, {
+                            method: "POST"
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    alert("삭제되었습니다.");
+                                    location.reload(); // 새로고침
+                                } else {
+                                    alert("삭제 실패!");
+                                }
+                            });
+                    }
+                });
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const createBoardBtn = document.getElementById("createBoardBtn");
+            const popupOverlay = document.getElementById("popupOverlay");
+            const cancelBtn = document.getElementById("cancelBtn");
+
+            // '새 게시판 만들기' 버튼을 클릭하면 팝업이 나타남
+            createBoardBtn.addEventListener("click", function () {
+                popupOverlay.style.display = "flex";
+                // 팝업이 열릴 때 입력 필드 초기화
+                document.querySelector('input[name="boardCode"]').value = '';
+                document.querySelector('input[name="boardName"]').value = ''; // 올바른 입력 필드 초기화
+            });
+
+            // 취소 버튼 클릭 시 팝업 닫기
+            cancelBtn.addEventListener("click", function () {
+                popupOverlay.style.display = "none";
+                // 팝업이 닫힐 때 입력 필드 초기화
+                document.querySelector('input[name="boardCode"]').value = '';
+                document.querySelector('input[name="boardName"]').value = ''; // 올바른 입력 필드 초기화
+            });
+        });
+
+
+
+        // 폼 요소를 가져오기
+        const form = document.getElementById('createBoardForm');
+
+        // 폼이 제출될 때 실행될 코드
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // 페이지 새로고침 막기
+
+            // 입력된 값들을 폼에서 가져옴
+            const formData = new FormData(form);
+
+            // fetch로 서버에 데이터 전송 (POST 방식)
+            fetch('/admin/board/create', {
+                method: 'POST',
+                body: new URLSearchParams(formData), // 데이터 변환해서 전송
+            })
+                .then(function (response) {
+                    return response.json(); // 서버 응답을 JSON으로 변환
+                })
+                .then(function (data) {
+                    alert(data.message); // 성공/실패 메시지 출력
+
+
+                    // 팝업 닫고 입력 초기화
+                    document.getElementById('popupOverlay').style.display = 'none';
+                    form.reset();
+
+                    // 성공이면 새로고침
+                    if (data.status === 'success') {
+                        setTimeout(() => {
+                            window.location.reload(); // 또는 window.location.href = '/admin/board';
+                        }, 1000); //1초후에 페이지 새로고침
+                    }
+                })
+                .catch(function (error) {
+                    console.error('에러:', error);
+                    alert('서버 오류가 발생했습니다.');
+
+                    // 오류 발생 시도 팝업 닫고 입력 초기화
+                    document.getElementById('popupOverlay').style.display = 'none';
+                    form.reset();
+                });
+        });
+
+    </script>
+
+</body>
+
+</html>

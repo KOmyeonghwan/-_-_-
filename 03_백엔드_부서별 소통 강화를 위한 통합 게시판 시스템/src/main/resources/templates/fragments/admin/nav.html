@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- 상단 네비게이션 바 -->
+    <div class="navbar {{#isLoggedIn}}logged-in{{/isLoggedIn}}">
+
+        <a href="/main" class="nav-link">메인페이지</a>
+
+        {{#isLoggedIn}}
+        <!-- 로그인 상태일 때 -->
+        <span class="welcome-text">{{user_name}}님</span>
+        <a href="/logout" class="nav-link">로그아웃</a>
+        {{/isLoggedIn}}
+
+        {{^isLoggedIn}}
+        <!-- 로그인 안 했을 때 -->
+        <a href="/login" class="nav-link">로그인</a>
+        {{/isLoggedIn}}
+    </div>
+
+    <script>
+        window.addEventListener('scroll', function () {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 0) {
+                navbar.classList.add('transparent');
+            } else {
+                navbar.classList.remove('transparent');
+            }
+        });   
+    </script>
+</body>
+
+</html>

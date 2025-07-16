@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부서 목록</title>
+    <link rel="stylesheet" href="/statictotal/css/total.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mustache@4.2.0/mustache.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #eef1f4;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+            width: calc(100% - 240px);
+            background-color: #fff;
+        }
+
+        .wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .department-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .department-table th:nth-child(1),
+        .department-table td:nth-child(1) {
+            width: 150px;
+            /* 부서명 */
+        }
+
+        .department-table th:nth-child(2),
+        .department-table td:nth-child(2) {
+            width: 100px;
+            /* 인원수 */
+        }
+
+        .department-table th:nth-child(3),
+        .department-table td:nth-child(3) {
+            width: 120px;
+            /* 생성일 */
+        }
+
+        .department-table th:nth-child(4),
+        .department-table td:nth-child(4) {
+            width: 120px;
+            /* 직원 목록 */
+        }
+
+        .department-table th:nth-child(5),
+        .department-table td:nth-child(5) {
+            width: 140px;
+            /* 관리 버튼 */
+        }
+
+        .department-table th,
+        .department-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .department-table th {
+            background: #34495e;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .department-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .department-table tr:hover {
+            background: #ecf0f1;
+        }
+
+        .department-table td button {
+            padding: 8px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background-color: #3498db;
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+
+        .department-table td button.view-employees-btn {
+            background-color: #2d3e50;
+        }
+
+        .department-table td button.delete-btn {
+            background-color: #e74c3c;
+        }
+
+        .department-table td button.update-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .department-table td button.delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .department-register {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #2d3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* 팝업창 스타일 */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .popup-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        .popup-content input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .popup-content div {
+            display: flex;
+            justify-content: center;
+            /* 버튼을 중앙에 정렬 */
+            gap: 10px;
+            /* 버튼 간 간격 */
+        }
+
+        .popup-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .popup-content button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .popup-content .cancel-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .popup-content .cancel-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .popup-content .submit-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .popup-content .submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* 직원 목록 테이블 스타일 */
+        #employeeListPopup table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #employeeListPopup th,
+        #employeeListPopup td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+            /* 테이블 셀 경계선 */
+            font-size: 14px;
+        }
+
+        #employeeListPopup th {
+            background-color: #34495e;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        #employeeListPopup tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        #employeeListPopup tr:hover {
+            background-color: #ecf0f1;
+        }
+
+        /* 직원 목록 테이블 버튼 스타일 (닫기 버튼) */
+        #employeeListPopup .cancel-btn {
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #employeeListPopup .cancel-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .checkbox-label {
+            display: inline-flex;
+            margin-top: 5px;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-top: 2px;
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- nav -->
+    {{> fragments/admin/nav}}
+
+    {{> fragments/admin/sidebar}}
+
+    <div class="main-content">
+        <div class="wrapper">
+            <div class="title-main">
+                <h1>부서 목록</h1>
+            </div>
+        </div>
+
+        <!-- 부서 목록 테이블 -->
+        <table class="department-table">
+            <thead>
+                <tr>
+                    <!-- <th>번호</th> -->
+                    <th>부서명</th>
+                    <th>인원수</th>
+                    <th>생성일</th>
+                    <th>직원 목록</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#departments}}
+                <tr>
+                    <!-- <td>{{deptId}}</td> -->
+                    <td>{{deptName}}</td>
+                    <td>{{memberCount}}</td>
+                    <td>{{createdAt}}</td>
+                    <td>
+                        <button class="view-employees-btn" data-deptid="{{deptId}}">보기</button>
+                    </td>
+                    <td>
+                        <button class="update-btn" data-deptid="{{deptId}}">수정</button>
+                        <button class="delete-btn" data-deptid="{{deptId}}">삭제</button>
+                    </td>
+                </tr>
+                {{/departments}}
+            </tbody>
+        </table>
+
+        <!-- 부서 추가 버튼 -->
+        <div style="text-align: right; margin-top: 20px;">
+            <button class="department-register open-popup-btn">부서 추가</button>
+        </div>
+    </div>
+
+    <!-- 부서 추가 팝업창 -->
+    <div class="popup" id="popup">
+        <div class="popup-content">
+            <h2>부서 추가</h2>
+            <form id="addDepartmentPopupForm">
+                <!-- 부서명 입력 -->
+                <input type="text" id="popupDeptNameInput" placeholder="부서명 입력" required>
+
+                <!-- 부서코드 입력 -->
+                <input type="text" id="popupDeptCodeInput" placeholder="부서코드 입력" required style="margin-top: 10px;">
+
+                <!-- 자동 게시판 생성 체크박스 -->
+                <div>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoCreateBoardCheckbox" />
+                        부서에 해당하는 게시판 자동 생성
+                    </label>
+                </div>
+
+                <!-- 버튼 영역 -->
+                <div style="display: flex; justify-content: center; gap: 10px;">
+                    <button type="submit" class="submit-btn">추가</button>
+                    <button type="button" class="cancel-btn close-popup-btn">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 부서 수정 팝업창 -->
+    <div class="popup" id="updatePopup">
+        <div class="popup-content">
+            <h2>부서 수정</h2>
+            <form id="updateDepartmentPopupForm">
+                <input type="text" id="updateDeptNameInput" placeholder="부서명 입력" required>
+                <input type="hidden" id="updateDeptIdInput"> <!-- deptId를 숨겨서 저장 -->
+                <div style="display: flex; justify-content: center; gap: 10px;">
+                    <button type="submit" class="submit-btn">수정</button>
+                    <button type="button" class="cancel-btn close-update-popup-btn">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- 직원 목록 팝업창 -->
+    <div class="popup" id="employeeListPopup">
+        <div class="popup-content">
+            <h2>직원 목록</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="text-align: left;">이름</th>
+                        <th style="text-align: left;">아이디</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeListBody">
+                    <!-- 직원 리스트 -->
+                </tbody>
+            </table>
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="button" class="cancel-btn close-employee-popup-btn">닫기</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // 부서 추가 팝업
+        document.querySelector('.open-popup-btn').addEventListener('click', () => {
+            document.getElementById('popup').style.display = 'flex';
+            document.getElementById('popupDeptNameInput').value = '';
+            document.getElementById('popupDeptCodeInput').value = '';
+        });
+
+        document.querySelector('.close-popup-btn').addEventListener('click', () => {
+            document.getElementById('popup').style.display = 'none';
+        });
+
+        // 부서 추가 submit
+        document.getElementById('addDepartmentPopupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const deptName = document.getElementById('popupDeptNameInput').value.trim();
+            const deptCode = document.getElementById('popupDeptCodeInput').value.trim();
+            const autoCreateBoard = document.getElementById('autoCreateBoardCheckbox').checked;
+
+            if (!deptName || !deptCode) {
+                alert("부서명과 부서코드를 입력하세요.");
+                return;
+            }
+
+            fetch("/admin/department/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ deptName, deptCode, autoCreateBoard })
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    alert("부서 추가 실패!");
+                }
+            }).catch(error => {
+                console.error(error);
+                alert("오류가 발생했습니다.");
+            });
+
+            document.getElementById('popup').style.display = 'none';
+        });
+
+        // 부서 수정 버튼 클릭
+        document.querySelectorAll('.update-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const deptId = this.dataset.deptid;
+
+                fetch(`/admin/department/get/${deptId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('updateDeptNameInput').value = data.deptName;
+                        document.getElementById('updateDeptIdInput').value = data.deptId;
+                        document.getElementById('updatePopup').style.display = 'flex';
+                    }).catch(err => {
+                        console.error(err);
+                        alert("부서 정보를 불러오는 데 실패했습니다.");
+                    });
+            });
+        });
+
+        // 부서 수정 폼 제출
+        document.getElementById('updateDepartmentPopupForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const deptName = document.getElementById('updateDeptNameInput').value.trim();
+            const deptId = document.getElementById('updateDeptIdInput').value;
+
+            if (!deptName) {
+                alert("부서명을 입력하세요.");
+                return;
+            }
+
+            fetch(`/admin/department/update/${deptId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ deptName: deptName })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.text().then(message => {
+                            alert(message);         // "부서가 수정되었습니다."
+                            location.reload();      // 새로고침
+                        });
+                    } else if (response.status === 409) {
+                        return response.text().then(message => {
+                            alert(message);         // "중복된 부서입니다."
+                        });
+                    } else {
+                        alert("부서 수정 실패!");
+                    }
+                })
+                .catch(error => {
+                    console.error("에러 발생:", error);
+                    alert("오류가 발생했습니다.");
+                });
+
+            // 팝업 닫기
+            document.getElementById('updatePopup').style.display = 'none';
+        });
+
+        // 부서 수정 팝업 닫기
+        document.querySelector('.close-update-popup-btn').addEventListener('click', () => {
+            document.getElementById('updatePopup').style.display = 'none';
+        });
+
+        // 부서 삭제 처리
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const deptId = this.dataset.deptid;
+
+                if (confirm("정말 삭제하시겠습니까?")) {
+                    fetch(`/admin/department/delete/${deptId}`, {
+                        method: "POST"
+                    }).then(res => {
+                        if (res.ok) {
+                            alert("부서가 삭제되었습니다.");
+                            location.reload();
+                        } else {
+                            alert("삭제 실패");
+                        }
+                    });
+                }
+            });
+        });
+
+        // 직원 보기
+        document.querySelectorAll('.view-employees-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const deptId = this.dataset.deptid;
+
+                fetch(`/admin/department/employees/${deptId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const body = document.getElementById('employeeListBody');
+                        body.innerHTML = '';
+
+                        if (data.length === 0) {
+                            body.innerHTML = `<tr><td colspan="2" style="text-align:center;">해당 부서 직원이 없습니다.</td></tr>`;
+                        } else {
+                            data.forEach(emp => {
+                                const row = `<tr><td>${emp.userName}</td><td>${emp.userid}</td></tr>`;
+                                body.insertAdjacentHTML('beforeend', row);
+                            });
+                        }
+
+                        document.getElementById('employeeListPopup').style.display = 'flex';
+                    }).catch(err => {
+                        console.error(err);
+                        alert("직원 목록을 불러오는 데 실패했습니다.");
+                    });
+            });
+        });
+
+        // 직원 팝업 닫기
+        document.querySelector('.close-employee-popup-btn').addEventListener('click', () => {
+            document.getElementById('employeeListPopup').style.display = 'none';
+        });
+    </script>
+</body>
+
+</html>

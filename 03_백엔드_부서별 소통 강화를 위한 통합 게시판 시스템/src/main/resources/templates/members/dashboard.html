@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>관리자 대시보드</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="statictotal/css/total.css">
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Reset & 기본 스타일 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    body {
+      background-color: #f9fafb;
+      display: flex;
+      color: #2c3a59;
+      min-height: 100vh;
+    }
+
+    /* 사이드바와 네비게이션 포함 공간 확보 */
+    .main-content {
+      margin-left: 240px;
+      padding: 40px 50px;
+      width: calc(100% - 240px);
+      background-color: #ffffff;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      border-radius: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    /* 상단 통계 카드 섹션 */
+    .top-stats-section {
+      width: 100%;
+    }
+
+    .stats-cards {
+      display: flex;
+      gap: 24px;
+    }
+
+    .stats-cards .card {
+      flex: 1;
+      background: #fafafa;
+      color: #222e50;
+      padding: 30px 35px;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(34, 46, 80, 0.1);
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .stats-cards .card:hover {
+      box-shadow: 0 10px 30px rgba(34, 46, 80, 0.15);
+    }
+
+    .stats-cards .card h3 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #1b264d;
+    }
+
+    .stats-cards .card h3 i {
+      font-size: 28px;
+      color: #4a5278;
+      flex-shrink: 0;
+    }
+
+    .stats-cards .card p {
+      font-size: 44px;
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      margin-top: 0;
+      line-height: 1;
+      color: #1b264d;
+    }
+
+    /* 달력 + 오늘 통계 카드 섹션 */
+    .middle-section {
+      display: flex;
+      gap: 30px;
+      width: 100%;
+    }
+
+    .calendar-container {
+      flex: 1.2;
+      background-color: #ffffff;
+      padding: 25px 30px;
+      border-radius: 16px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+      /* 높이 좀 더 넉넉하게 설정 */
+      height: 460px;
+      overflow: hidden;
+    }
+
+    #calendar {
+      max-width: 100%;
+      height: 100% !important;
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow-y: auto;
+      color: #222e50;
+    }
+
+    /* FullCalendar 내부 텍스트 색 조정 */
+    .fc {
+      color: #222e50;
+      font-weight: 500;
+    }
+
+    .today-stats-cards {
+      flex: 0.7;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .today-stats-cards .card {
+      background-color: #fafafa;
+      color: #222e50;
+      padding: 28px 24px;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(34, 46, 80, 0.1);
+      cursor: default;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .today-stats-cards .card:hover {
+      box-shadow: 0 8px 28px rgba(34, 46, 80, 0.15);
+    }
+
+    .today-stats-cards .card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      letter-spacing: 0.05em;
+      color: #1b264d;
+    }
+
+    .today-stats-cards .card p {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      margin: 0;
+      line-height: 1;
+      color: #1b264d;
+    }
+
+    /* 게시판 섹션 */
+    .board-section {
+      display: flex;
+      gap: 30px;
+      width: 100%;
+    }
+
+    .board-card {
+      flex: 1;
+      background: #fafafa;
+      padding: 30px 35px;
+      border-radius: 20px;
+      box-shadow:
+        0 6px 12px rgba(34, 46, 80, 0.06);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .board-card:hover {
+      box-shadow:
+        0 10px 28px rgba(34, 46, 80, 0.12);
+    }
+
+    .board-card h2 {
+      font-size: 28px;
+      font-weight: 900;
+      color: #1b264d;
+      border-bottom: 3px solid #4a5278;
+      padding-bottom: 10px;
+      margin-bottom: 28px;
+      letter-spacing: 0.06em;
+      user-select: none;
+    }
+
+    .board-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .board-card ul li {
+      padding: 14px 0;
+      border-bottom: 1px solid #d8dde6;
+      font-weight: 600;
+      font-size: 17px;
+      color: #2c3a59;
+      transition: color 0.3s ease;
+    }
+
+    .board-card ul li:last-child {
+      border-bottom: none;
+    }
+
+    .board-card ul li a {
+      text-decoration: none;
+      color: #4a5278;
+      font-weight: 700;
+      transition: color 0.3s ease;
+    }
+
+    .board-card ul li a:hover {
+      color: #1b264d;
+      text-decoration: underline;
+    }
+
+    .post-meta {
+      font-size: 13px;
+      color: #7a8bbf;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .more-container {
+      text-align: right;
+      margin-top: 18px;
+    }
+
+    .more-link {
+      display: inline-block;
+      font-weight: 700;
+      color: #4a5278;
+      padding: 10px 24px;
+      border-radius: 28px;
+      border: 2px solid #4a5278;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .more-link:hover {
+      background-color: #4a5278;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  {{> fragments/admin/nav}}
+  {{> fragments/admin/sidebar}}
+
+  <div class="main-content">
+    <!-- 맨 위 통계 카드 -->
+    <div class="top-stats-section">
+      <div class="stats-cards">
+        <div class="card">
+          <h3><i class="fa-solid fa-folder-open"></i> 전체 게시판</h3>
+          <p>{{totalBoards}}</p>
+        </div>
+        <div class="card">
+          <h3><i class="fa-solid fa-file-lines"></i> 전체 게시글</h3>
+          <p>{{totalPosts}}</p>
+        </div>
+        <div class="card">
+          <h3><i class="fa-solid fa-users"></i> 전체 회원</h3>
+          <p>{{totalUsers}}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 달력 + 오늘 통계 카드 -->
+    <div class="middle-section">
+      <div class="calendar-container">
+        <div id="calendar"></div>
+      </div>
+      <div class="today-stats-cards">
+        <div class="card">
+          <h3>오늘 가입한 회원</h3>
+          <p>{{todayUsers}}</p>
+        </div>
+        <div class="card">
+          <h3>오늘 등록된 게시글</h3>
+          <p>{{todayPosts}}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 게시판 카드 3개 -->
+    <div class="board-section">
+      <!-- 건의사항 -->
+      <div class="board-card">
+        <h2>건의사항</h2>
+        <ul>
+          {{#suggestList}}
+          <li>
+            <a href="/admin/boardview/{{id}}?boardCode=suggest">{{title}}</a>
+            <div class="post-meta">{{userName}} | {{createdAt}}</div>
+          </li>
+          {{/suggestList}}
+        </ul>
+        <div class="more-container">
+          <a href="/admin/boardlist?boardCode=suggest" class="more-link">더보기</a>
+        </div>
+      </div>
+
+      <!-- 공지사항 -->
+      <div class="board-card">
+        <h2>공지사항</h2>
+        <ul>
+          {{#noticeList}}
+          <li>
+            <a href="/admin/boardview/{{id}}?boardCode=notice">{{title}}</a>
+            <div class="post-meta">{{userName}} | {{createdAt}}</div>
+          </li>
+          {{/noticeList}}
+        </ul>
+        <div class="more-container">
+          <a href="/admin/boardlist?boardCode=notice" class="more-link">더보기</a>
+        </div>
+      </div>
+
+      <!-- 자유게시판 -->
+      <div class="board-card">
+        <h2>자유게시판</h2>
+        <ul>
+          {{#freeList}}
+          <li>
+            <a href="/admin/boardview/{{id}}?boardCode=free">{{title}}</a>
+            <div class="post-meta">{{userName}} | {{createdAt}}</div>
+          </li>
+          {{/freeList}}
+        </ul>
+        <div class="more-container">
+          <a href="/admin/boardlist?boardCode=free" class="more-link">더보기</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        height: '100%',
+        contentHeight: 'auto',
+        headerToolbar: {
+          left: 'title',
+          center: '',
+          right: 'today prev,next'
+        },
+        buttonText: {
+          today: 'Today',
+          prev: '⏴',
+          next: '⏵'
+        },
+        selectable: true,
+        dayMaxEvents: true,
+        events: []
+      });
+      calendar.render();
+    });
+  </script>
+</body>
+
+</html>

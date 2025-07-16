@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 목록</title>
+    <link rel="stylesheet" href="statictotal/css/total.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mustache@4.2.0/mustache.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #eef1f4;
+        }
+
+        /* 메인 컨텐츠 */
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+            width: calc(100% - 240px);
+            background-color: #fff;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            /* 세로로 배치 */
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .search-main {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            /* 왼쪽 정렬 */
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-main form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-main select,
+        .search-main input,
+        .search-main button {
+            height: 36px;
+            /* 동일한 높이로 설정 */
+            padding: 8px;
+            /* 패딩 추가 (상하 좌우에 패딩을 동일하게) */
+            font-size: 14px;
+            box-sizing: border-box;
+            /* 테두리와 패딩을 포함한 크기 계산 */
+        }
+
+        .search-main button {
+            padding: 0 20px;
+            margin-bottom: 20px;
+            /* 버튼의 좌우 여백을 더 추가 */
+        }
+
+        .search-main select,
+        .search-main input {
+            flex-grow: 1;
+            /* 입력창과 셀렉트박스가 가능한 공간을 차지하도록 설정 */
+        }
+
+        /* 회원 관리 테이블 */
+        .member-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .member-table th,
+        .member-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .member-table th {
+            background: #34495e;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .member-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .member-table tr:hover {
+            background: #ecf0f1;
+        }
+
+        .member-table td button {
+            padding: 8px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background-color: #3498db;
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+
+        .member-table td button.delete-btn {
+            background-color: #e74c3c;
+        }
+
+        .member-table td button:hover {
+            background-color: #2980b9;
+        }
+
+        .member-table td button.delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .disabled-btn {
+            background-color: #bdc3c7 !important;
+            color: black !important;
+            cursor: not-allowed !important;
+
+        }
+
+        .member-register {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #2d3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .member-register:hover {
+            background-color: #3498db;
+        }
+
+        .bottom-controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .pagination {
+            list-style: none;
+            display: flex;
+            gap: 6px;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .pagination li a {
+            display: inline-block;
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .pagination li.active a {
+            background-color: #2d3e50;
+            color: white;
+            font-weight: bold;
+        }
+
+        .member-register {
+            padding: 10px 20px;
+            background-color: #2d3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .member-register:hover {
+            background-color: #3498db;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- nav -->
+    {{> fragments/admin/nav}}
+
+    {{> fragments/admin/sidebar}}
+
+    <div class="main-content">
+        <div class="wrapper">
+            <div class="title-main">
+                <h1>회원 관리</h1>
+            </div>
+
+            <div class="search-main">
+                <form method="get" action="/admin"
+                    style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+                    <select name="type" style="padding: 8px; font-size: 14px;">
+                        <option value="userid" {{#isUserId}}selected{{/isUserId}}>아이디</option>
+                        <option value="username" {{#isUserName}}selected{{/isUserName}}>이름</option>
+                    </select>
+                    <input type="text" name="search" placeholder="검색어 입력" value="{{search}}"
+                        style="padding: 8px; font-size: 14px;">
+                    <button type="submit" class="member-register">검색</button>
+                </form>
+            </div>
+
+
+            <!-- 회원 관리 테이블 -->
+            <table class="member-table">
+                <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>아이디</th>
+                        <th>이름</th>
+                        <th>이메일</th>
+                        <th>주소</th>
+                        <th>전화번호</th>
+                        <th>가입일</th>
+                        <th>부서</th>
+                        <th>권한</th>
+                        <th>비고</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#userList}}
+                    <tr>
+                        <td>{{useridx}}</td>
+                        <td>{{userid}}</td>
+                        <td>{{userName}}</td>
+                        <td>{{userEmail}}</td>
+                        <td>{{zipCode}}</td>
+                        <td>{{phone}}</td>
+                        <td>{{reg_date}}</td>
+                        <td>{{deptName}}</td>
+                        <td>
+                            <label>
+                                <label>
+                                    <input type="radio" class="admin-radio" data-userid="{{userid}}"
+                                        name="admin_{{userid}}" value="1" {{#isAdmin}}checked disabled{{/isAdmin}}
+                                        {{^isAdmin}}{{#isAdmin}}checked{{/isAdmin}}{{/isAdmin}}> 관리자
+                                    <input type="radio" class="admin-radio" data-userid="{{userid}}"
+                                        name="admin_{{userid}}" value="0" {{^isAdmin}}checked{{/isAdmin}}
+                                        {{#isAdmin}}disabled{{/isAdmin}}> 사용자
+                                </label>
+                        </td>
+
+                        <td>
+                            {{#isAdmin}}
+                            <button class="delete-btn disabled-btn" disabled>삭제 불가</button>
+                            {{/isAdmin}}
+                            {{^isAdmin}}
+                            <button class="delete-btn" data-userid="{{userid}}">삭제</button>
+                            {{/isAdmin}}
+                        </td>
+
+                    </tr>
+                    {{/userList}}
+
+                    {{^userList}}
+                    <tr>
+                        <td colspan="8">회원이 없습니다.</td>
+                    </tr>
+                    {{/userList}}
+                </tbody>
+            </table>
+
+            <!-- 회원 추가 및 페이지네이션 -->
+            <div class="bottom-controls">
+                <ul class="pagination">
+                    {{#userPage.hasPrevious}}
+                    <li><a href="/admin?page={{userPage.prevPage}}">이전</a></li>
+                    {{/userPage.hasPrevious}}
+
+                    {{#userPage.pages}}
+                    <li class="{{#active}}active{{/active}}">
+                        <a href="/admin?page={{number}}">{{display}}</a>
+                    </li>
+                    {{/userPage.pages}}
+
+                    {{#userPage.hasNext}}
+                    <li><a href="/admin?page={{userPage.nextPage}}">다음</a></li>
+                    {{/userPage.hasNext}}
+                </ul>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const deleteButtons = document.querySelectorAll(".delete-btn");
+                deleteButtons.forEach(button => {
+                    button.addEventListener("click", function () {
+                        if (this.disabled) return; // 비활성화된 버튼은 무시
+                        const userid = this.getAttribute("data-userid");
+                        if (confirm(`정말로 삭제하시겠습니까?`)) {
+                            fetch(`/admin/delete/${userid}`, { method: "POST" })
+                                .then(response => {
+                                    if (response.ok) {
+                                        alert("삭제되었습니다.");
+                                        location.reload();
+                                    } else {
+                                        alert("삭제 실패");
+                                    }
+                                });
+                        }
+                    });
+                });
+
+                const adminRadios = document.querySelectorAll(".admin-radio");
+                adminRadios.forEach(radio => {
+                    radio.addEventListener("change", function () {
+                        if (this.disabled) return; // 관리자 라디오 막기
+                        const userid = this.getAttribute("data-userid");
+                        const adminValue = this.value;
+
+                        fetch(`/admin/update-admin`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ userid: userid, admin: parseInt(adminValue) })
+                        }).then(response => {
+                            if (response.ok) {
+                                alert("권한이 변경되었습니다.");
+                                location.reload();
+                            } else {
+                                alert("변경 실패");
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
+</body>
+
+</html>
